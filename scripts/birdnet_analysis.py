@@ -26,7 +26,7 @@ DEFAULT_PROBE = 'local'
 def infer_probe_tag(file_path: str) -> str:
     """Infer the source probe from the filename added by the recorder."""
     name = os.path.splitext(os.path.basename(file_path))[0]
-    pattern = r'^\d{4}-\d{2}-\d{2}-birdnet-([^-]+)-(?:RTSP_\d+-)?\d{2}:\d{2}:\d{2}$'
+    pattern = r'^\d{4}-\d{2}-\d{2}-birdnet-([A-Za-z0-9_-]+)-(?:RTSP_\d+-)?\d{2}:\d{2}:\d{2}$'
     match = re.match(pattern, name)
     if match:
         return match.group(1)

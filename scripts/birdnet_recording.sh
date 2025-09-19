@@ -23,7 +23,7 @@ if [ -z "${PROBE_NAME}" ]; then
     PROBE_NAME="local"
   fi
 fi
-PROBE_TAG=$(echo "${PROBE_NAME}" | tr '[:upper:]' '[:lower:]' | tr -c '[:alnum:]_' '_' )
+PROBE_TAG=$(echo "${PROBE_NAME}" | tr '[:upper:]' '[:lower:]' | tr -c '[:alnum:]_' '_')
 STREAM_DIR="${RECS_DIR}/StreamData"
 [ -d "$STREAM_DIR" ] || mkdir -p "$STREAM_DIR"
 

@@ -73,7 +73,12 @@ def spectrogram(in_file, title, comment, raw=False):
 
 def extract_detection(file: ParseFileName, detection: Detection):
     conf = get_settings()
-    new_file_name = f'{detection.common_name_safe}-{detection.confidence_pct}-{detection.date}-birdnet-{file.RTSP_id}{detection.time}.{conf["AUDIOFMT"]}'
+    probe = getattr(file, 'probe', 'local')
+    probe_part = f'{probe}-' if probe else ''
+    new_file_name = (
+        f'{detection.common_name_safe}-{detection.confidence_pct}-{detection.date}-'
+        f'birdnet-{probe_part}{file.RTSP_id}{detection.time}.{conf["AUDIOFMT"]}'
+    )
     new_dir = os.path.join(conf['EXTRACTED'], 'By_Date', f'{detection.date}', f'{detection.common_name_safe}')
     new_file = os.path.join(new_dir, new_file_name)
     if os.path.isfile(new_file):
@@ -92,10 +97,11 @@ def write_to_db(file: ParseFileName, detection: Detection):
         try:
             con = sqlite3.connect(DB_PATH)
             cur = con.cursor()
-            cur.execute("INSERT INTO detections VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            cur.execute("INSERT INTO detections (Date, Time, Sci_Name, Com_Name, Confidence, Lat, Lon, Cutoff, Week, Sens, Overlap, File_Name, Probe)"
+                        " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         (detection.date, detection.time, detection.scientific_name, detection.common_name, detection.confidence,
                          conf['LATITUDE'], conf['LONGITUDE'], conf['CONFIDENCE'], str(detection.week), conf['SENSITIVITY'],
-                         conf['OVERLAP'], os.path.basename(detection.file_name_extr)))
+                         conf['OVERLAP'], os.path.basename(detection.file_name_extr), getattr(file, 'probe', 'local')))
             # (Date, Time, Sci_Name, Com_Name, str(score),
             # Lat, Lon, Cutoff, Week, Sens,
             # Overlap, File_Name))
@@ -140,6 +146,7 @@ def write_to_json_file(file: ParseFileName, detections: [Detection]):
     json_file = f'{file.file_name}.json'
     log.debug(f'WRITING RESULTS TO {json_file}')
     dets = {'file_name': os.path.basename(json_file), 'timestamp': file.iso8601, 'delay': conf['RECORDING_LENGTH'],
+            'probe': getattr(file, 'probe', 'local'),
             'detections': [{"start": det.start, "common_name": det.common_name, "confidence": det.confidence} for det in
                            detections]}
     with open(json_file, 'w') as rfile:
