@@ -180,6 +180,13 @@ PROCESSED=$HOME/BirdSongs/Processed
 
 EXTRACTED=$HOME/BirdSongs/Extracted
 
+#--------------------------  Probe API Access  -------------------------------#
+
+## Optional bearer token for remote probes uploading recordings via REST API.
+## If left blank, HTTP Basic auth (birdnet + CADDY_PWD) is required instead.
+
+PROBE_API_TOKEN=
+
 ## OVERLAP is the value in seconds which BirdNET should use when analyzing
 ## the data. The values must be between 0.0-2.9.
 

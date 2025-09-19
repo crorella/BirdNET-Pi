@@ -14,7 +14,8 @@ def create_test_db(db_file):
                                         id integer PRIMARY KEY,
                                         Com_Name text NOT NULL,
                                         Date date NULL,
-                                        Time time NULL
+                                        Time time NULL,
+                                        Probe text NULL
                                     ); """
         cur = conn.cursor()
         cur.execute(sql_create_detections_table)
