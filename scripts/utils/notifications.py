@@ -1,4 +1,34 @@
-import apprise
+import types
+
+try:
+    import apprise  # type: ignore
+except ImportError:  # pragma: no cover - fallback for minimal test envs
+    class _DummyAppriseAsset:  # noqa: D401 - simple stub
+        def __init__(self, *_, **__):
+            pass
+
+    class _DummyAppriseConfig:
+        def __init__(self):
+            self._targets = []
+
+        def add(self, *_args, **_kwargs):
+            return True
+
+    class _DummyApprise:
+        def __init__(self, *_, **__):
+            pass
+
+        def add(self, *_args, **_kwargs):
+            return True
+
+        def notify(self, *_, **__):
+            return True
+
+    apprise = types.SimpleNamespace(  # type: ignore
+        AppriseAsset=_DummyAppriseAsset,
+        AppriseConfig=_DummyAppriseConfig,
+        Apprise=_DummyApprise,
+    )
 import os
 import socket
 import sqlite3

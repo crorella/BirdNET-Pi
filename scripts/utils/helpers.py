@@ -87,7 +87,11 @@ class ParseFileName:
         ident_match = re.search("RTSP_[0-9]+-", file_name)
         self.RTSP_id = ident_match.group() if ident_match is not None else ""
         probe_match = re.search(r'-birdnet-([A-Za-z0-9_-]+)-', name)
-        self.probe = probe_match.group(1) if probe_match else 'local'
+        if probe_match:
+            candidate = probe_match.group(1)
+            self.probe = 'local' if candidate.startswith('RTSP_') else candidate
+        else:
+            self.probe = 'local'
 
     @property
     def iso8601(self):

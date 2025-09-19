@@ -129,6 +129,15 @@ if ! grep -E '^IMAGE_PROVIDER=' /etc/birdnet/birdnet.conf &>/dev/null;then
   echo "IMAGE_PROVIDER=${PROVIDER}" >> /etc/birdnet/birdnet.conf
 fi
 
+DB_PATH="$HOME/BirdNET-Pi/scripts/birds.db"
+if [ -f "$DB_PATH" ]; then
+  HAS_PROBE_COLUMN=$(sqlite3 "$DB_PATH" "PRAGMA table_info(detections);" | awk -F'|' '$2=="Probe" {print $2}')
+  if [ -z "$HAS_PROBE_COLUMN" ]; then
+    sqlite3 "$DB_PATH" "ALTER TABLE detections ADD COLUMN Probe VARCHAR(100) DEFAULT 'local';"
+  fi
+  sqlite3 "$DB_PATH" "CREATE INDEX IF NOT EXISTS detections_Probe ON detections (Probe);"
+fi
+
 [ -d $RECS_DIR/StreamData ] || sudo_with_user mkdir -p $RECS_DIR/StreamData
 [ -L ${EXTRACTED}/spectrogram.png ] || sudo_with_user ln -sf ${RECS_DIR}/StreamData/spectrogram.png ${EXTRACTED}/spectrogram.png
 
