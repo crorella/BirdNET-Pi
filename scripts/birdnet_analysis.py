@@ -20,6 +20,21 @@ shutdown = False
 
 log = logging.getLogger(__name__)
 
+DEFAULT_PROBE = 'local'
+
+
+def infer_probe_tag(file_path: str) -> str:
+    """Infer the source probe from the filename added by the recorder."""
+    name = os.path.splitext(os.path.basename(file_path))[0]
+    pattern = r'^\d{4}-\d{2}-\d{2}-birdnet-([^-]+)-(?:RTSP_\d+-)?\d{2}:\d{2}:\d{2}$'
+    match = re.match(pattern, name)
+    if match:
+        return match.group(1)
+    legacy_pattern = r'^\d{4}-\d{2}-\d{2}-birdnet-(?:RTSP_\d+-)?\d{2}:\d{2}:\d{2}$'
+    if re.match(legacy_pattern, name):
+        return DEFAULT_PROBE
+    return DEFAULT_PROBE
+
 
 def sig_handler(sig_num, curr_stack_frame):
     global shutdown
@@ -84,15 +99,19 @@ def process_file(file_name, report_queue):
         if os.path.getsize(file_name) == 0:
             os.remove(file_name)
             return
-        log.info('Analyzing %s', file_name)
+        probe_tag = infer_probe_tag(file_name)
+        log.info('Analyzing %s [probe=%s]', file_name, probe_tag)
         with open(ANALYZING_NOW, 'w') as analyzing:
             analyzing.write(file_name)
         file = ParseFileName(file_name)
+        # Attach the inferred probe so downstream consumers (reporting/DB) can persist it.
+        file.probe = probe_tag
         detections = run_analysis(file)
         # we join() to make sure te reporting queue does not get behind
         if not report_queue.empty():
             log.warning('reporting queue not yet empty')
         report_queue.join()
+        # Preserve probe context as part of the reporting payload.
         report_queue.put((file, detections))
     except BaseException as e:
         stderr = e.stderr.decode('utf-8') if isinstance(e, CalledProcessError) else ""
