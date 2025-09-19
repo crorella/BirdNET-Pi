@@ -29,7 +29,10 @@ def infer_probe_tag(file_path: str) -> str:
     pattern = r'^\d{4}-\d{2}-\d{2}-birdnet-([A-Za-z0-9_-]+)-(?:RTSP_\d+-)?\d{2}:\d{2}:\d{2}$'
     match = re.match(pattern, name)
     if match:
-        return match.group(1)
+        candidate = match.group(1)
+        if candidate.startswith('RTSP_'):
+            return DEFAULT_PROBE
+        return candidate
     legacy_pattern = r'^\d{4}-\d{2}-\d{2}-birdnet-(?:RTSP_\d+-)?\d{2}:\d{2}:\d{2}$'
     if re.match(legacy_pattern, name):
         return DEFAULT_PROBE
