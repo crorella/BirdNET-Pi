@@ -31,6 +31,9 @@ Changes include:
  - Rework daily_plot.py (chart_viewer) to run as a daemon to avoid the very expensive startup
  - Lots of fixes & cleanups
 
+## Contributing
+Consult the [Repository Guidelines](AGENTS.md) for project structure, coding standards, testing expectations, and pull request requirements before submitting changes.
+
 !! note: see 'Migrating' on how to migrate from mcguirepr89
 
 ## Introduction
